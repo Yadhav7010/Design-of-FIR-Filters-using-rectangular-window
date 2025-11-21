@@ -14,40 +14,43 @@
 clc;
 clear;
 close;
+N = 25;           
+wc = 0.4 * %pi;    
+alpha = (N - 1) / 2; 
 
-// Filter specifications
-forder = 33;                     // Filter order (odd number)
-cutoff_frequency = 0.2;          // Normalized cutoff frequency (0 < cutoff <= 0.5)
-window_type = "hm";              // Hamming window ("re" for rectangular, "hm" for Hamming, etc.)
-window_params = [0, 0];          // Window parameters (for Kaiser and Chebyshev windows)
+hd = zeros(1, N);
+for n = 0:N-1
+    if (n - alpha) == 0 then
+        hd(n+1) = wc / %pi;
+    else
+        hd(n+1) = sin(wc * (n - alpha)) / (%pi * (n - alpha));
+    end
+end
 
-// Design FIR low pass filter and get frequency response
-[h, h_freq, fr] = wfir("lp", forder, [cutoff_frequency, 0], window_type, window_params);
+w = ones(1, N);
 
-// Display filter coefficients
-disp(h, "Filter Coefficients:");
+h = hd .* w;
 
-// Plot magnitude response
-scf(0);
-subplot(2,1,1);
-plot(fr, abs(h_freq));
-xlabel("Normalized Frequency");
-ylabel("Magnitude");
-title("Frequency Response Magnitude of FIR Low Pass Filter");
+Nfft = 1024;              
+H = fft(h, -1);           
+H = [H, zeros(1, Nfft - N)];
+H = fft(H, -1);           
 
-// Plot magnitude in dB
-subplot(2,1,2);
-plot(fr, 20*log10(abs(h_freq)));
-xlabel("Normalized Frequency");
-ylabel("Magnitude (dB)");
-title("Frequency Response (dB) of FIR Low Pass Filter");
+f = (0:Nfft-1) / Nfft;
+
+plot(f, abs(H));
+xlabel('Normalized Frequency');
+ylabel('Magnitude');
+title('Low Pass FIR Filter using Rectangular Window');
+xgrid();
+
+disp("Filter Coefficients:");
+disp(h);
 ```
 
-
 # OUTPUT
-<img width="1920" height="1080" alt="Screenshot 2025-11-11 110517" src="https://github.com/user-attachments/assets/0910fa9e-299b-472d-b5cd-f4ec1c188c5e" />
-
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/6a8e23f3-85fe-4d06-8449-022afab7a843" />
 
 # RESULT
-THE DESIGN OF LOW PASS FIR DIGITAL FILTER IS SUCCESSFULLY COMPLETED USING SCILAB.
 
+The Low Pass FIR digital filter was successfully designed using the rectangular window method, and its impulse and frequency responses were plotted and observed to exhibit proper low-pass characteristics.
